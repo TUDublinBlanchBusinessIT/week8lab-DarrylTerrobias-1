@@ -1,52 +1,71 @@
-#MyFirstGUI
 from tkinter import *
+import sqlite3
 
 class MyFirstGUI:
     
     def __init__(self, master):
         self.master = master
-        master.title("A simple GUI")
-        
+        master.title("Tennis Club Membership")
+
         self.label1 = Label(master, text="Enter your Firstname")
         self.label1.pack()
-        self.entry1 = Entry()
+        self.entry1 = Entry(master)
         self.entry1.pack()
 
-        self.label2 = Label(master, text="Enter your Surname")
+        self.label2 = Label(master, text="Enter your Lastname")
         self.label2.pack()
-        self.entry2 = Entry()
+        self.entry2 = Entry(master)
         self.entry2.pack()
 
-        self.label3 = Label(master, text="Date of Birth")
+        self.label3 = Label(master, text="Enter DOB")
         self.label3.pack()
-        self.entry3 = Entry()
+        self.entry3 = Entry(master)
         self.entry3.pack()
 
         self.label4 = Label(master, text="Enter Member Type")
         self.label4.pack()
-        self.entry4 = Entry()
+        self.entry4 = Entry(master)
         self.entry4.pack()
 
-        
-        self.InsertDB = Button(master, text="Insert Into Database", command=self.InsertDBFunction)
-        self.InsertDB.pack()
+        self.insertButton = Button(master, text="Insert Into DB", command=self.insert_member)
+        self.insertButton.pack()
 
-        self.PrintMembers = Button(master, text="Print Members", command=self.PrintMembersFunction)
-        self.PrintMembers.pack()    
-
+        self.printButton = Button(master, text="Print All Members", command=self.print_members)
+        self.printButton.pack()
 
         self.closeButton = Button(master, text="Close", command=self.close)
         self.closeButton.pack()
 
-    def InsertDBFunction(self):    
-        print("Testing " + self.entry1.get())
+    def insert_member(self):
+        firstname = self.entry1.get()
+        surname = self.entry2.get()
+        dob = self.entry3.get()
+        member_type = self.entry4.get()
+
+        conn = sqlite3.connect("tennisclub.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO member (Firstname, Surname, DateOfBirth, MemberType) VALUES (?, ?, ?, ?)", 
+                       (firstname, surname, dob, member_type))
+        conn.commit()
+        conn.close()
+
+        print(f"Inserted: {firstname} {surname}, DOB: {dob}, Type: {member_type}")
+
+    def print_members(self):
+        conn = sqlite3.connect("tennisclub.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM member")
+        records = cursor.fetchall()
+        conn.close()
+
         
-    def PrintMembersFunction(self):    
-        print("Print Test " + self.entry1.get())
+        for record in records:
+            print(record)
 
     def close(self):
-        root.destroy()
+        self.master.destroy()
 
 root = Tk()
 my_gui = MyFirstGUI(root)
-root.dooneevent()
+
+root.mainloop()
